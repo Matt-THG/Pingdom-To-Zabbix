@@ -1,140 +1,244 @@
-# Pingdom-Zabbix Integration Script
+<div align="center">
 
-This script integrates Pingdom monitoring with Zabbix for automated host creation, item monitoring, trigger creation, and status updates. It fetches Pingdom checks, creates corresponding hosts in Zabbix if necessary, and synchronizes their status periodically.
+# 🔗 Pingdom-To-Zabbix Integration
 
-## Table of Contents
+**Automates the integration of Pingdom uptime checks into Zabbix for centralized infrastructure monitoring.**
 
-1. [Script Details](#script-details)
-2. [Prerequisites](#prerequisites)
-3. [Setup](#setup)
-4. [Configuration](#configuration)
-5. [Usage](#usage)
-6. [Logging](#logging)
-7. [Error Handling](#error-handling)
-8. [Cronjob Setup](#cronjob-setup)
-9. [License](#license)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.x](https://img.shields.io/badge/python-3.x-blue.svg)](https://www.python.org/)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/NexteraMatt/Pingdom-To-Zabbix/graphs/commit-activity)
 
-## Script Details
+[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Documentation](#-how-it-works)
 
-### Functionality
-
-The script automates the integration between Pingdom and Zabbix for monitoring purposes. It fetches Pingdom checks using the Pingdom API, creates corresponding hosts in Zabbix if they don't exist, sets up monitoring items and triggers, and updates Zabbix with the latest status from Pingdom checks.
-
-### Key Features
-
-- **Pingdom Integration**: Fetches Pingdom checks using the Pingdom API.
-- **Zabbix Host Management**: Creates Zabbix hosts dynamically based on Pingdom checks.
-- **Item and Trigger Creation**: Sets up Zabbix items and triggers to monitor Pingdom check statuses.
-- **Status Synchronization**: Updates Zabbix with the latest status information retrieved from Pingdom.
-
-## Prerequisites
-
-Before running the script, ensure you have the following:
-
-- **Python 3.7+**: Installed on your system. [Download Python](https://www.python.org/downloads/)
-- **Pingdom API Credentials**:
-  - API key (`PINGDOM_API_KEY`).
-- **Zabbix API Credentials**:
-  - API URL (`ZABBIX_API_URL`).
-  - Username (`ZABBIX_API_USER`).
-  - Password (`ZABBIX_API_PASSWORD`).
-- **Zabbix Configuration**:
-  - Host group ID (`ZABBIX_HOST_GROUP_ID`): ID of the host group in Zabbix where hosts will be created.
-  - Template ID (`ZABBIX_TEMPLATE_ID`): ID of the template in Zabbix to link with the created hosts.
-
-Environment variables should be set up in a `.env` file in the root directory of the script with the following format:
-
-```env
-PINGDOM_API_KEY=your_pingdom_api_key
-ZABBIX_API_URL=your_zabbix_api_url
-ZABBIX_API_USER=your_zabbix_api_user
-ZABBIX_API_PASSWORD=your_zabbix_api_password
-ZABBIX_HOST_GROUP_ID=your_zabbix_host_group_id
-ZABBIX_TEMPLATE_ID=your_zabbix_template_id
-```
-
-- **PINGDOM_API_KEY**: API key for accessing Pingdom API (e.g., `abcdef123456`).
-- **ZABBIX_API_URL**: URL of the Zabbix API (e.g., `https://zabbix.example.com/api_jsonrpc.php`).
-- **ZABBIX_API_USER**: Username for Zabbix API authentication (e.g., `admin`).
-- **ZABBIX_API_PASSWORD**: Password for Zabbix API authentication (e.g., `mypassword`).
-- **ZABBIX_HOST_GROUP_ID**: ID of the Zabbix host group to place new hosts (e.g., `1234`).
-- **ZABBIX_TEMPLATE_ID**: ID of the Zabbix template to apply to new hosts (e.g., `5678`).
-
-## Setup
-
-1. **Clone the repository**:
-
-```sh
-git clone https://github.com/MattTHG/pingdom-to-zabbix.git
-cd pingdom-to-zabbix
-```
-
-2. **Install dependencies**:
-
-```sh
-pip install -r requirements.txt
-```
-
-3. **Create a `.env` file** in the root directory and add your environment variables as mentioned in the Prerequisites section.
-
-## Configuration
-
-Ensure the `.env` file contains valid credentials and IDs required for accessing Pingdom and Zabbix APIs.
-
-## Usage
-
-To run the script, use Python 3.7+:
-
-```sh
-python script_name.py
-```
-
-The script will continuously fetch Pingdom checks, create Zabbix hosts and items if necessary, and update Zabbix with the latest statuses.
-
-## Logging
-
-- **INFO**: Detailed execution steps, successful operations.
-- **WARNING**: Retries during HTTP requests.
-- **ERROR**: Critical errors and exceptions.
-
-Logs are printed to the console. Redirect or append logs to a file for long-term storage.
-
-To append logs to a file, you can run the script with output redirection:
-
-```sh
-python3 pingdom-zabbix-integration.py >> python3 /path/to/logfile.log 2>&1
-```
-
-## Error Handling
-
-The script handles various exceptions (e.g., HTTP errors, API request failures) and logs detailed error messages for troubleshooting.
-
-## Cronjob Setup
-
-To automate script execution, set up a cronjob:
-
-1. Edit your crontab:
-
-```sh
-crontab -e
-```
-
-2. Add a cronjob to run the script at your desired interval (e.g., every minute):
-
-```sh
-* * * * * /usr/bin/python3 /path/to/pingdom-zabbix-integration.py >> /path/to/logfile.log 2>&1
-```
-
-This example runs the script every hour (`* * * * *`) and appends both stdout and stderr to `script_logs.log`.
-
-## License
-
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+</div>
 
 ---
 
-### Notes:
+## 🎯 The Problem
 
-- Replace `<placeholders>` with actual values relevant to your environment.
-- Ensure all dependencies are installed from `requirements.txt` before running the script.
-- Adjust the sleep interval (`await asyncio.sleep(60)`) in the `main_async()` function as per your monitoring requirements.
+Teams using both Pingdom (for external uptime monitoring) and Zabbix (for internal infrastructure monitoring) face several challenges:
+
+| Challenge | Impact |
+|-----------|--------|
+| 🔄 **Context switching** | Engineers must check multiple systems to correlate data |
+| 📋 **Duplicate effort** | Maintaining check configurations in two separate systems |
+| 🔔 **Alert fatigue** | Separate alerting systems create noise and delays |
+| 👁️ **Incomplete visibility** | No single source of truth for overall system health |
+
+---
+
+## ✨ The Solution
+
+This tool automatically syncs Pingdom checks into Zabbix via API, creating:
+
+```mermaid
+graph LR
+    A[Pingdom Checks] -->|API Sync| B[This Tool]
+    B --> C[Zabbix Hosts]
+    B --> D[Zabbix Items]
+    B --> E[Zabbix Triggers]
+    C --> F[Unified Dashboard]
+    D --> F
+    E --> F
+```
+
+Engineers can now see Pingdom uptime data alongside internal metrics in a single Zabbix dashboard, improving incident response and reducing context switching.
+
+---
+
+## 🚀 Features
+
+<table>
+<tr>
+<td width="50%">
+
+### Core Functionality
+- ✅ **Idempotent sync** - Safely re-run without duplicates
+- 🏗️ **Automatic host creation** - Dynamic Zabbix hosts
+- 📊 **Status tracking** - Monitor up/down and response times
+- 🎯 **Trigger automation** - Set up alerting automatically
+- 🗂️ **Clear mapping** - Organized host groups and templates
+- 🔌 **API-driven** - Uses official Pingdom & Zabbix APIs
+
+</td>
+<td width="50%">
+
+### Benefits
+- ⚡ **Faster incident response** - Single pane of glass
+- 🔕 **Reduced alert fatigue** - Unified alerting
+- 🔍 **Better correlation** - External + internal metrics
+- 📈 **Single source of truth** - Zabbix as central hub
+- 🤖 **Full automation** - No manual maintenance
+
+</td>
+</tr>
+</table>
+
+---
+
+## 📋 Prerequisites
+
+```bash
+✓ Python 3.x
+✓ Pingdom API access (API key, username, password)
+✓ Zabbix server with API access
+✓ requests Python library
+```
+
+---
+
+## 🔧 Installation
+
+**1️⃣ Clone the repository**
+```bash
+git clone https://github.com/NexteraMatt/Pingdom-To-Zabbix.git
+cd Pingdom-To-Zabbix
+```
+
+**2️⃣ Install dependencies**
+```bash
+pip install requests
+```
+
+**3️⃣ Configure API credentials** (see [Configuration](#⚙️-configuration) section)
+
+---
+
+## ⚙️ Configuration
+
+Create a configuration file with your API credentials:
+
+```ini
+[pingdom]
+app_key = your_pingdom_app_key
+username = your_pingdom_email
+password = your_pingdom_password
+
+[zabbix]
+server = https://your-zabbix-server/api_jsonrpc.php
+username = your_zabbix_username
+password = your_zabbix_password
+```
+
+> 💡 **Tip:** Keep this file secure and never commit it to version control. Add it to `.gitignore`.
+
+---
+
+## 🎮 Usage
+
+### Manual Execution
+
+```bash
+python pingdom_to_zabbix.py
+```
+
+### Automated Scheduling (Recommended)
+
+Add to crontab for regular syncing:
+
+```bash
+# Run every 15 minutes
+*/15 * * * * /usr/bin/python3 /path/to/pingdom_to_zabbix.py
+```
+
+---
+
+## 🔄 How It Works
+
+```
+┌─────────────────┐
+│ 1. Fetch Checks │  Retrieves all active checks from Pingdom API
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ 2. Create Hosts │  For each check, creates or updates a Zabbix host
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ 3. Setup Items  │  Configures items to track status and response time
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ 4. Add Triggers │  Creates triggers for down/degraded status alerts
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ 5. Push Values  │  Updates current check status and response times
+└─────────────────┘
+```
+
+---
+
+## 💪 Benefits
+
+<div align="center">
+
+| Benefit | Before | After |
+|---------|--------|-------|
+| **Incident Response Time** | Check 2+ systems | Single dashboard view |
+| **Alert Management** | Duplicate alerts from both systems | Unified alerting in Zabbix |
+| **Data Correlation** | Manual correlation required | Automatic correlation |
+| **System Maintenance** | Manage 2 separate platforms | Single platform maintenance |
+
+</div>
+
+---
+
+## 🛠️ Stack
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/Zabbix-CC2936?style=for-the-badge&logo=zabbix&logoColor=white" alt="Zabbix" />
+  <img src="https://img.shields.io/badge/Pingdom-FFC633?style=for-the-badge&logo=statuspage&logoColor=black" alt="Pingdom" />
+</p>
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please:
+
+- ✅ Code follows PEP 8 style guidelines
+- ✅ Changes are tested against both Pingdom and Zabbix APIs
+- ✅ Documentation is updated for new features
+- ✅ Pull requests include clear descriptions
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+Built to solve real operational challenges in managing distributed monitoring infrastructure.
+
+---
+
+## 📬 Support
+
+<div align="center">
+
+**Need help or found a bug?**
+
+[![GitHub Issues](https://img.shields.io/github/issues/NexteraMatt/Pingdom-To-Zabbix)](https://github.com/NexteraMatt/Pingdom-To-Zabbix/issues)
+
+[Open an Issue](https://github.com/NexteraMatt/Pingdom-To-Zabbix/issues) • [Visit Portfolio](https://matthodges.uk)
+
+</div>
+
+---
+
+<div align="center">
+
+**Made with ❤️ by [Matt Hodges](https://matthodges.uk)**
+
+⭐ Star this repo if you find it useful!
+
+</div>
